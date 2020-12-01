@@ -1,0 +1,5 @@
+```
+dotnet run
+
+dotnet test
+```
