@@ -30,6 +30,11 @@ module Day2 =
         let count = (Seq.filter ((=) spec.Letter) text) |> Seq.length
         (spec.MinCount <= count) && (count <= spec.MaxCount)
 
-    let validatePartTwo spec text =
-        let count = (Seq.filter ((=) spec.Letter) text) |> Seq.length
-        (spec.MinCount <= count) && (count <= spec.MaxCount)
+    let validatePartTwo spec (text : string) =
+        let (lo, hi) = spec.MinCount - 1, spec.MaxCount - 1
+
+        if hi >= String.length text 
+            then false
+        else
+            let (isFirst, isLast) = text.[lo] = spec.Letter, text.[hi] = spec.Letter
+            isFirst <> isLast

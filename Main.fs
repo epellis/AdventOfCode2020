@@ -14,7 +14,8 @@ let main args =
         0
     | ["2"; filename] ->
         let lines = Common.fileToStringList filename |> Seq.map Day2.parse
-        let validated = Seq.map (fun (spec, input) -> Day2.validate spec input) lines
+        // let validated = Seq.map (fun (spec, input) -> Day2.validatePartOne spec input) lines
+        let validated = Seq.map (fun (spec, input) -> Day2.validatePartTwo spec input) lines
         let count = validated |> Seq.filter id |> Seq.length
         printfn "Valid: %A" count
         0
