@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Days/Day1.fs" />
+    <Compile Include="Days/Day2.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Tests.fs" />
     <Compile Include="Main.fs" />
@@ -15,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.*" />
+    <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
     <PackageReference Update="FSharp.Core" Version="4.*" />

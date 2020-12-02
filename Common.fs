@@ -7,3 +7,7 @@ module Common =
         File.ReadLines filename 
         |> Seq.map int
         |> Seq.toList
+
+    let fileToStringList filename =
+        File.ReadLines filename 
+        |> Seq.toList
