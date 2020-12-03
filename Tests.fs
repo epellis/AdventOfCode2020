@@ -1,8 +1,11 @@
 module Tests
 
 open Expecto
+open Common
 open Days.Day1
 open Days.Day2
+open Days.Day3
+
 
 [<Tests>]
 let tests =
@@ -23,4 +26,11 @@ let tests =
       Expect.isTrue (Day2.validatePartTwo { MinCount = 1; MaxCount = 3; Letter = 'a'} "abcde") ""
       Expect.isFalse (Day2.validatePartTwo { MinCount = 1; MaxCount = 3; Letter = 'b'} "cdefg") ""
       Expect.isFalse (Day2.validatePartTwo { MinCount = 1; MaxCount = 9; Letter = 'c'} "ccccccccc") ""
-  ]
+
+    testCase "Day 3" <| fun _ ->
+      Expect.equal (Day3.parseLine ".#.") [|Day3.Snow; Day3.Tree; Day3.Snow|] ""
+      let day3Landscape = 
+        Common.fileToStringList "/Users/e/Documents/AdventOfCode/inputs/Day3Test.txt"
+        |> Day3.parseInput
+      Expect.equal (Day3.countTrees day3Landscape {Day3.X = 0; Day3.Y = 0} {Day3.X = 3 ; Day3.Y = 1}) 7 ""
+]
