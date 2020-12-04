@@ -24,8 +24,8 @@ module Day3 =
         let features = Seq.map parseLine lines |> Seq.toArray
         { Features = features
           Dimensions =
-              { X = (Seq.length features.[0])
-                Y = (Seq.length features) } }
+              { X = Seq.length features.[0]
+                Y = Seq.length features } }
 
     let countTrees landscape startingPoint velocityVector =
         let rec countTreesInner landscape startingPoint score =
