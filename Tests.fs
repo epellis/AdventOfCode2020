@@ -109,4 +109,4 @@ let tests =
                   |> Seq.filter id
                   |> Seq.length
 
-              Expect.equal validations 2 "" ]
+              Expect.equal validations 4 "" ]

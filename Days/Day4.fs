@@ -93,7 +93,6 @@ module Day4 =
 
         List.fold folder (Some Passport.Blank) fields
 
-
     let validate input =
         let output = run fieldParser input
         match output with
