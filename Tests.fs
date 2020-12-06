@@ -98,4 +98,15 @@ let tests =
 
               Expect.isFalse (Day4.validate "iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884 hcl:#cfa07d byr:1929") ""
               Expect.isTrue (Day4.validate "hcl:#ae17e1 iyr:2013 eyr:2024 ecl:brn pid:760753108 byr:1931 hgt:179cm") ""
-              Expect.isFalse (Day4.validate "hcl:#cfa07d eyr:2025 pid:166559648 iyr:2011 ecl:brn hgt:59in") "" ]
+              Expect.isFalse (Day4.validate "hcl:#cfa07d eyr:2025 pid:166559648 iyr:2011 ecl:brn hgt:59in") ""
+
+              let passportInputs =
+                  Common.fileToNewlineSeparatedList "/Users/e/Documents/AdventOfCode/inputs/Day4Test.txt"
+
+              let validations =
+                  passportInputs
+                  |> Seq.map Day4.validate
+                  |> Seq.filter id
+                  |> Seq.length
+
+              Expect.equal validations 2 "" ]

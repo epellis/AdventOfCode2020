@@ -4,6 +4,7 @@ open Common
 open Days.Day1
 open Days.Day2
 open Days.Day3
+open Days.Day4
 
 [<EntryPoint>]
 let main args =
@@ -42,5 +43,18 @@ let main args =
 
         let score = Seq.reduce (*) scores
         printfn "Score: %d" score
+        0
+    | [ "4"; filename ] ->
+        let passportInputs =
+            Common.fileToNewlineSeparatedList filename
+
+        let validations =
+            passportInputs
+            |> Seq.map Day4.validate
+            |> Seq.filter id
+            |> Seq.length
+
+        printfn "Counted %A valid passports." validations
+
         0
     | _ -> -1

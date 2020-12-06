@@ -7,3 +7,8 @@ module Common =
 
     let fileToIntList filename =
         fileToStringList filename |> List.map int
+
+    let fileToNewlineSeparatedList filename =
+        let contents = File.ReadAllText filename
+        contents.Split("\n\n")
+        |> Seq.map (fun s -> s.Replace("\n", " "))

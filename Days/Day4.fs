@@ -3,56 +3,28 @@ module Days.Day4
 open FParsec
 
 module Day4 =
-    type Color =
-        | Literal of string
-        | Hex of string
-
-    type Height =
-        | Inches of int32
-        | Centimeters of int32
-
     type FieldNode =
-        | BirthYear of int32
-        | IssueYear of int32
-        | ExpYear of int32
-        | Height of Height
-        | HairColor of Color
-        | EyeColor of Color
+        | BirthYear of string
+        | IssueYear of string
+        | ExpYear of string
+        | Height of string
+        | HairColor of string
+        | EyeColor of string
         | PassportId of string
         | CountryId of string
 
-    let intParser prefix = skipString prefix >>. pint32 .>> spaces
-
-    let colorHexParser = skipChar '#' >>. manyChars hex |>> Hex
-
-    let colorLiteralParser = manyChars letter |>> Literal
-
-    let heightInchesParser = pint32 .>> skipString "in" |>> Inches
-
-    let centimetersParser =
-        pint32 .>> skipString "cm" |>> Centimeters
-
-    let colorParser prefix =
+    let stringParser prefix =
         skipString prefix
-        >>. (colorHexParser <|> colorLiteralParser)
-        .>> spaces
+        >>. manyCharsTill anyChar (spaces1 <|> eof)
 
-    let idParser prefix =
-        skipString prefix >>. manyChars digit .>> spaces
-
-    let heightParser prefix =
-        skipString prefix
-        >>. (centimetersParser <|> heightInchesParser)
-        .>> spaces
-
-    let parseBirthYear = (intParser "byr:") |>> BirthYear
-    let parseIssueYear = (intParser "iyr:") |>> IssueYear
-    let parseExpYear = (intParser "eyr:") |>> ExpYear
-    let parseHeight = (heightParser "hgt:") |>> Height
-    let parseHairColor = (colorParser "hcl:") |>> HairColor
-    let parseEyeColor = (colorParser "ecl:") |>> EyeColor
-    let parsePassportId = (idParser "pid:") |>> PassportId
-    let parseCountryId = (idParser "cid:") |>> CountryId
+    let parseBirthYear = (stringParser "byr:") |>> BirthYear
+    let parseIssueYear = (stringParser "iyr:") |>> IssueYear
+    let parseExpYear = (stringParser "eyr:") |>> ExpYear
+    let parseHeight = (stringParser "hgt:") |>> Height
+    let parseHairColor = (stringParser "hcl:") |>> HairColor
+    let parseEyeColor = (stringParser "ecl:") |>> EyeColor
+    let parsePassportId = (stringParser "pid:") |>> PassportId
+    let parseCountryId = (stringParser "cid:") |>> CountryId
 
     let fieldLiteral =
         choice [ parseBirthYear
@@ -67,12 +39,12 @@ module Day4 =
     let fieldParser = many fieldLiteral
 
     type Passport =
-        { BirthYear: int32 Option
-          IssueYear: int32 Option
-          ExpYear: int32 Option
-          Height: Height Option
-          HairColor: Color Option
-          EyeColor: Color Option
+        { BirthYear: string Option
+          IssueYear: string Option
+          ExpYear: string Option
+          Height: string Option
+          HairColor: string Option
+          EyeColor: string Option
           PassportId: string Option
           CountryId: string Option }
 
@@ -94,7 +66,7 @@ module Day4 =
               this.HairColor.IsSome
               this.EyeColor.IsSome
               this.PassportId.IsSome
-              this.CountryId.IsSome ]
+              this.CountryId.IsSome || this.CountryId.IsNone ]
             |> Seq.reduce (&&)
 
     exception PassportParseException of string
@@ -126,7 +98,8 @@ module Day4 =
         let output = run fieldParser input
         match output with
         | Success (result, _, _) ->
-            printfn "Parsing Success: %O" result
+            printfn "Parsing: %A" input
+            printfn "Parsing Success: %A" result
             let passport = buildPassport result
             printfn "Build Passport Success: %O" passport
 
@@ -140,5 +113,5 @@ module Day4 =
             validatedPassport.IsSome
 
         | Failure (why, _, _) ->
-            printfn "Failure: %O" why
-            false
+            printfn "Invalid Passport: %A" why
+            raise (PassportParseException why)
