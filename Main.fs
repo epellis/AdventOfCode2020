@@ -6,6 +6,7 @@ open Days.Day2
 open Days.Day3
 open Days.Day4
 open Days.Day5
+open Days.Day6
 
 [<EntryPoint>]
 let main args =
@@ -77,5 +78,25 @@ let main args =
 
         printfn "Lowest Empty Seat: %A" lowestEmptySeat
 
+        0
+    | [ "6"; filename ] ->
+        let groupEntries =
+            Common.fileToNewlineSeparatedList filename
+            |> Seq.map (fun s -> s.Split " ")
+            |> Seq.map (Array.toList)
+            |> Seq.map (Seq.map (Seq.toList))
+
+        let groupAnswers =
+            groupEntries |> Seq.map Day6.buildAnswers
+
+        let groupScores =
+            groupAnswers |> Seq.map (Set.toSeq >> Seq.length)
+
+        let totalScores = Seq.reduce (+) groupScores
+
+        printfn "Group Entries %A" groupEntries
+        printfn "Group Answers %A" groupAnswers
+        printfn "Group Scores %A" groupScores
+        printfn "Total Scores %A" totalScores
         0
     | _ -> -1
