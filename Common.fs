@@ -12,3 +12,4 @@ module Common =
         let contents = File.ReadAllText filename
         contents.Split("\n\n")
         |> Seq.map (fun s -> s.Replace("\n", " "))
+        |> Seq.map (fun s -> s.Trim ' ')

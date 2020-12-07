@@ -86,17 +86,22 @@ let main args =
             |> Seq.map (Array.toList)
             |> Seq.map (Seq.map (Seq.toList))
 
-        let groupAnswers =
-            groupEntries |> Seq.map Day6.buildAnswers
+        let groupAnswerAnyYes = groupEntries |> Seq.map Day6.anyYes
+        let groupAnswerAllYes = groupEntries |> Seq.map Day6.allYes
 
-        let groupScores =
-            groupAnswers |> Seq.map (Set.toSeq >> Seq.length)
+        let totalAny =
+            groupAnswerAnyYes
+            |> Seq.map (Set.toSeq >> Seq.length)
+            |> Seq.reduce (+)
 
-        let totalScores = Seq.reduce (+) groupScores
+        let totalAll =
+            groupAnswerAllYes
+            |> Seq.map (Set.toSeq >> Seq.length)
+            |> Seq.reduce (+)
 
-        printfn "Group Entries %A" groupEntries
-        printfn "Group Answers %A" groupAnswers
-        printfn "Group Scores %A" groupScores
-        printfn "Total Scores %A" totalScores
+        let printList = Seq.iter (printf "%A ")
+
+        printfn "Total Any: %A" totalAny
+        printfn "Total All: %A" totalAll
         0
     | _ -> -1
