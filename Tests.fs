@@ -7,6 +7,7 @@ open Days.Day2
 open Days.Day3
 open Days.Day4
 open Days.Day5
+open Days.Day7
 
 
 [<Tests>]
@@ -126,4 +127,13 @@ let tests =
               Expect.equal (Day5.findSeat "BBFFBBFRLL") { Day5.Row = 102; Column = 4 } ""
               Expect.equal (Day5.findSeat "BFFFBBFRRR").Number 567 ""
               Expect.equal (Day5.findSeat "FFFBBBFRRR").Number 119 ""
-              Expect.equal (Day5.findSeat "BBFFBBFRLL").Number 820 "" ]
+              Expect.equal (Day5.findSeat "BBFFBBFRLL").Number 820 ""
+
+          testCase "Day 7"
+          <| fun _ ->
+              Expect.equal
+                  (Day7.determineCapacity "light red bags contain 1 bright white bag, 2 muted yellow bags.")
+                  ("light red",
+                   Set [ (1, "bright white")
+                         (2, "muted yellow") ])
+                  "" ]
