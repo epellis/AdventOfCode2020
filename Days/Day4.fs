@@ -1,116 +1,143 @@
 module Days.Day4
 
-open FParsec
 
 module Day4 =
+    type Height =
+        | Inches of int32
+        | Centimeters of int32
+
+    type HexColor = HexColor of string
+    type PassportEncoding = PassportEncoding of string
+
     type FieldNode =
-        | BirthYear of string
-        | IssueYear of string
-        | ExpYear of string
-        | Height of string
-        | HairColor of string
+        | BirthYear of int32
+        | IssueYear of int32
+        | ExpYear of int32
+        | Height of Height
+        | HairColor of HexColor
         | EyeColor of string
-        | PassportId of string
+        | PassportId of PassportEncoding
         | CountryId of string
 
-    let stringParser prefix =
-        skipString prefix
-        >>. manyCharsTill anyChar (spaces1 <|> eof)
+    module Parser =
+        open FParsec
 
-    let parseBirthYear = (stringParser "byr:") |>> BirthYear
-    let parseIssueYear = (stringParser "iyr:") |>> IssueYear
-    let parseExpYear = (stringParser "eyr:") |>> ExpYear
-    let parseHeight = (stringParser "hgt:") |>> Height
-    let parseHairColor = (stringParser "hcl:") |>> HairColor
-    let parseEyeColor = (stringParser "ecl:") |>> EyeColor
-    let parsePassportId = (stringParser "pid:") |>> PassportId
-    let parseCountryId = (stringParser "cid:") |>> CountryId
+        let spaceParser = (spaces1 <|> eof)
 
-    let fieldLiteral =
-        choice [ parseBirthYear
-                 parseIssueYear
-                 parseExpYear
-                 parseHeight
-                 parseHairColor
-                 parseEyeColor
-                 parsePassportId
-                 parseCountryId ]
+        let stringParser prefix =
+            skipString prefix
+            >>. manyCharsTill anyChar spaceParser
 
-    let fieldParser = many fieldLiteral
+        let intParser prefix =
+            skipString prefix >>. pint32 .>> spaceParser
 
-    type Passport =
-        { BirthYear: string Option
-          IssueYear: string Option
-          ExpYear: string Option
-          Height: string Option
-          HairColor: string Option
-          EyeColor: string Option
-          PassportId: string Option
-          CountryId: string Option }
+        let inParser = pint32 .>> skipString "in" |>> Inches
 
-        static member Blank =
-            { BirthYear = None
-              IssueYear = None
-              ExpYear = None
-              Height = None
-              HairColor = None
-              EyeColor = None
-              PassportId = None
-              CountryId = None }
+        let cmParser =
+            pint32 .>> skipString "cm" |>> Centimeters
 
-        member this.Valid =
-            [ this.BirthYear.IsSome
-              this.IssueYear.IsSome
-              this.ExpYear.IsSome
-              this.Height.IsSome
-              this.HairColor.IsSome
-              this.EyeColor.IsSome
-              this.PassportId.IsSome
-              this.CountryId.IsSome || this.CountryId.IsNone ]
-            |> Seq.reduce (&&)
+        let heightParser prefix =
+            skipString prefix
+            >>. (attempt inParser <|> attempt cmParser)
+            .>> spaceParser
 
-    exception PassportParseException of string
+        let hexColorParser prefix =
+            skipString prefix
+            >>. skipChar '#'
+            >>. manyMinMaxSatisfy 6 6 isHex
+            |>> HexColor
+            .>> spaceParser
 
-    let fillField passport field =
+        let passportIdParser prefix =
+            skipString prefix
+            >>. manyMinMaxSatisfy 9 9 isDigit
+            |>> PassportEncoding
+            .>> spaceParser
+
+        let parseBirthYear = (intParser "byr:") |>> BirthYear
+        let parseIssueYear = (intParser "iyr:") |>> IssueYear
+        let parseExpYear = (intParser "eyr:") |>> ExpYear
+        let parseHeight = (heightParser "hgt:") |>> Height
+        let parseHairColor = (hexColorParser "hcl:") |>> HairColor
+        let parseEyeColor = (stringParser "ecl:") |>> EyeColor
+        let parsePassportId = (passportIdParser "pid:") |>> PassportId
+        let parseCountryId = (stringParser "cid:") |>> CountryId
+
+        let fieldLiteral =
+            choice [ parseBirthYear
+                     parseIssueYear
+                     parseExpYear
+                     parseHeight
+                     parseHairColor
+                     parseEyeColor
+                     parsePassportId
+                     parseCountryId ]
+
+        let fieldParser = many fieldLiteral
+
+        let parse input =
+            match run fieldParser input with
+            | Success (result, _, _) -> Some result
+            | Failure (why, _, _) -> None
+
+    let between lower value upper = (lower <= value) && (value <= upper)
+
+    let validHairColors =
+        Set [ "amb"
+              "blu"
+              "brn"
+              "gry"
+              "grn"
+              "hzl"
+              "oth" ]
+
+    let validate field =
         match field with
-        | BirthYear y when passport.BirthYear.IsNone -> Some { passport with BirthYear = Some y }
-        | IssueYear y when passport.IssueYear.IsNone -> Some { passport with IssueYear = Some y }
-        | ExpYear y when passport.ExpYear.IsNone -> Some { passport with ExpYear = Some y }
-        | Height h when passport.Height.IsNone -> Some { passport with Height = Some h }
-        | HairColor c when passport.HairColor.IsNone -> Some { passport with HairColor = Some c }
-        | EyeColor c when passport.EyeColor.IsNone -> Some { passport with EyeColor = Some c }
-        | PassportId i when passport.PassportId.IsNone -> Some { passport with PassportId = Some i }
-        | CountryId i when passport.CountryId.IsNone -> Some { passport with CountryId = Some i }
-        | _ ->
-            printfn "Fill Field Failed, Field: %A Passport: %A" field passport
-            None
+        | BirthYear year -> between 1910 year 2002
+        | IssueYear year -> between 2010 year 2020
+        | ExpYear year -> between 2020 year 2030
+        | Height (Inches height) -> between 59 height 76
+        | Height (Centimeters height) -> between 150 height 193
+        | HairColor (HexColor _) -> true
+        | EyeColor color -> validHairColors.Contains color
+        | PassportId (PassportEncoding _) -> true
+        | CountryId _ -> true
 
-    let buildPassport fields =
-        let folder state field =
-            match state with
-            | Some state -> fillField state field
-            | None -> None
+    let validateAndMark field (state: Map<string, bool>) =
+        let isValid = validate field
+        match field with
+        | BirthYear _ -> Map.add "BirthYear" (isValid || state.["BirthYear"]) state
+        | IssueYear _ -> Map.add "IssueYear" (isValid || state.["IssueYear"]) state
+        | ExpYear _ -> Map.add "ExpYear" (isValid || state.["ExpYear"]) state
+        | Height _ -> Map.add "Height" (isValid || state.["Height"]) state
+        | HairColor _ -> Map.add "HairColor" (isValid || state.["HairColor"]) state
+        | EyeColor _ -> Map.add "EyeColor" (isValid || state.["EyeColor"]) state
+        | PassportId _ -> Map.add "PassportId" (isValid || state.["PassportId"]) state
+        | CountryId _ -> Map.add "CountryId" (isValid || state.["CountryId"]) state
 
-        List.fold folder (Some Passport.Blank) fields
+    let validateAll fields =
+        printfn "Validating %A" fields
 
-    let validate input =
-        let output = run fieldParser input
-        match output with
-        | Success (result, _, _) ->
-            printfn "Parsing: %A" input
-            printfn "Parsing Success: %A" result
-            let passport = buildPassport result
-            printfn "Build Passport Success: %O" passport
+        let mutable validatedFields =
+            Map [ ("BirthYear", false)
+                  ("IssueYear", false)
+                  ("ExpYear", false)
+                  ("Height", false)
+                  ("HairColor", false)
+                  ("EyeColor", false)
+                  ("PassportId", false)
+                  ("CountryId", true) ]
 
-            let validatedPassport =
-                match passport with
-                | Some passport when passport.Valid -> Some passport
-                | _ -> None
+        for field in fields do
+            validatedFields <- validateAndMark field validatedFields
 
-            printfn "Passport Valid: %O" validatedPassport
+        validatedFields
+        |> Map.toSeq
+        |> Seq.map snd
+        |> Seq.filter id
+        |> Seq.length
+        |> (=) ((Map.toSeq >> Seq.length) validatedFields)
 
-            validatedPassport.IsSome
-
-        | Failure (why, _, _) ->
-            printfn "Invalid Passport: %A" why
-            raise (PassportParseException why)
+    let run input =
+        Parser.parse input
+        |> Option.map validateAll = Some true

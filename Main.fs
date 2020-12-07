@@ -50,7 +50,7 @@ let main args =
 
         let validations =
             passportInputs
-            |> Seq.map Day4.validate
+            |> Seq.map Day4.run
             |> Seq.filter id
             |> Seq.length
 
