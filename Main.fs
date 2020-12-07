@@ -5,6 +5,7 @@ open Days.Day1
 open Days.Day2
 open Days.Day3
 open Days.Day4
+open Days.Day5
 
 [<EntryPoint>]
 let main args =
@@ -55,6 +56,26 @@ let main args =
             |> Seq.length
 
         printfn "Counted %A valid passports." validations
+
+        0
+    | [ "5"; filename ] ->
+        let codes = Common.fileToStringList filename
+
+        let seats = codes |> Seq.map Day5.findSeat
+
+        let highestSeat = seats |> (Seq.maxBy (fun s -> s.Number))
+        printfn "Highest Seat: %A Number %A" highestSeat highestSeat.Number
+
+        let occupiedSeatNumbers =
+            seats |> Seq.map (fun s -> s.Number) |> Seq.sort
+
+        let startSeatSearch = Seq.min occupiedSeatNumbers
+
+        let lowestEmptySeat =
+            Seq.fold (fun lowest seat -> if lowest = seat then lowest + 1 else lowest) startSeatSearch
+                occupiedSeatNumbers
+
+        printfn "Lowest Empty Seat: %A" lowestEmptySeat
 
         0
     | _ -> -1

@@ -116,8 +116,6 @@ module Day4 =
         | CountryId _ -> Map.add "CountryId" (isValid || state.["CountryId"]) state
 
     let validateAll fields =
-        printfn "Validating %A" fields
-
         let mutable validatedFields =
             Map [ ("BirthYear", false)
                   ("IssueYear", false)

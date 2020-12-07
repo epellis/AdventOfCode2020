@@ -6,6 +6,7 @@ open Days.Day1
 open Days.Day2
 open Days.Day3
 open Days.Day4
+open Days.Day5
 
 
 [<Tests>]
@@ -109,4 +110,20 @@ let tests =
                   |> Seq.filter id
                   |> Seq.length
 
-              Expect.equal validations 4 "" ]
+              Expect.equal validations 4 ""
+
+          testCase "Day 5"
+          <| fun _ ->
+              Expect.equal (Day5.parseBinary [ 0 ]) 0 ""
+              Expect.equal (Day5.parseBinary [ 1 ]) 1 ""
+              Expect.equal (Day5.parseBinary [ 1; 1 ]) 3 ""
+              Expect.equal (Day5.parseBinary [ 0; 1 ]) 1 ""
+              Expect.equal (Day5.parseBinary [ 1; 0 ]) 2 ""
+              Expect.equal (Day5.parseBinary [ 0; 0 ]) 0 ""
+              Expect.equal (Day5.findSeat "FBFBBFFRLR") { Day5.Row = 44; Column = 5 } ""
+              Expect.equal (Day5.findSeat "BFFFBBFRRR") { Day5.Row = 70; Column = 7 } ""
+              Expect.equal (Day5.findSeat "FFFBBBFRRR") { Day5.Row = 14; Column = 7 } ""
+              Expect.equal (Day5.findSeat "BBFFBBFRLL") { Day5.Row = 102; Column = 4 } ""
+              Expect.equal (Day5.findSeat "BFFFBBFRRR").Number 567 ""
+              Expect.equal (Day5.findSeat "FFFBBBFRRR").Number 119 ""
+              Expect.equal (Day5.findSeat "BBFFBBFRLL").Number 820 "" ]
